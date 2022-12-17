@@ -1,6 +1,0 @@
-{
-    "port": "/dev/tty.usbmodemHIDPC1",
-    "board": "arduino:avr:leonardo",
-    "sketch": "leonardo.ino",
-    "programmer": "arduino:arduinoasisp"
-}
