@@ -2,7 +2,7 @@
 #define HFKeyboard_h
 
 #include <Arduino.h>
-#include <HFButton.h>
+#include "/Users/luukmeier/Documents/Repos/Haptic Friend/arduino/src/HFButton/HFButton.h"
 
 # define my_sizeof(type) ((char *)(&type+1)-(char*)(&type))
 

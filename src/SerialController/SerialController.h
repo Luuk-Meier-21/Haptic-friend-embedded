@@ -2,7 +2,6 @@
 #define SerialController_h
 
 #include <Arduino.h>
-#include <Vector.h>
 
 extern "C" {
     typedef void (*serialCallbackFunction)(String);
