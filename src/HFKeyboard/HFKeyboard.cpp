@@ -10,70 +10,92 @@ void HFKeyboard::setup() {
 };
 
 void HFKeyboard::tick() {
-
+    for (int i = 0; i < _listenersLength; i++) {
+        _listeners[i].node.button.tick();
+    }
 };
 
-InputNode HFKeyboard::createNode(char id, int inputPin, int outputPin) {
-    InputNode node;
-    node.id = id;
-    node.inputPin = inputPin;
-    node.outputPin = outputPin;
-    node.valid = true;
-    return node;
-}
-
-InputNode HFKeyboard::createNode(bool isValid) {
-    InputNode node;
-    node.id = 'x';
-    node.inputPin = 0;
-    node.outputPin = 0;
-    node.valid = isValid;
-    return node;
-}
-
-InputNode HFKeyboard::addNode(char id, int inputPin, int outputPin) {
-    InputNode node = createNode(id, inputPin, outputPin);
+Node HFKeyboard::addNode(char id, int inputPin, int outputPin) {
+    Node node = Node(id, inputPin, outputPin);
     push(_nodes, _nodesLength, node);
+
     return node;
 };
 
-InputNode HFKeyboard::findNode(char targetId) {
+Node HFKeyboard::findNode(char targetId) {
     // Inverse lookup:
-    InputNode targetNode;
+    Node targetNode;
+
     for (int i = 0; i < _nodesLength; i++) {
         if(_nodes[i].id == targetId) {
             targetNode = _nodes[i];
             break;
         }
     }
-    if(!targetNode.valid) return createNode(false);
+    if(!targetNode.valid) return Node();
     return targetNode;
 };
 
-Listener HFKeyboard::createListener(bool isValid) { 
-    Listener listener;
-    listener.node = createNode(isValid);
-    listener.type = 'empty';
-    listener.keystroke = NULL;
-    listener.valid = isValid;
-    return listener;
+void HFKeyboard::logNodes() {
+    for (int i = 0; i < _nodesLength; i++) {
+        Serial.println(_nodes[i].id);
+    }
 }
 
-Listener HFKeyboard::createListener(char node, char type, char keystroke) { 
-    InputNode targetNode = findNode(node);
-    if (!targetNode.valid) return createListener(false);
-}
+bool HFKeyboard::addListener(char nodeChar, char type, char keystroke) {
+    Node targetNode = findNode(nodeChar);
 
-void HFKeyboard::addListener(Listener listener) {
+    if (!targetNode.valid) return false;
+    if (findListener(nodeChar).valid) return false;
+
+    Listener listener(targetNode, ListenerType::KeystrokeClick, keystroke);
     
+    push(_listeners, _listenersLength, listener);
+    return true;
 };
 
+int HFKeyboard::findListenerIndex(char targetNodeChar) {
+    // Inverse lookup, to generic function?:
+    int targetListenerIndex;
+    bool found;
+    for (int i = 0; i < _listenersLength; i++) {
+        if(_listeners[i].node.id == targetNodeChar) {
+            targetListenerIndex = i;
+            found = true;
+            break;
+        }
+    }
+    if(!found) return _listenersLength;
+    return targetListenerIndex;
+};
+
+Listener HFKeyboard::findListener(char targetNodeChar) {
+    // Inverse lookup, to generic function?:
+    Listener targetListener;
+    for (int i = 0; i < _listenersLength; i++) {
+        if(_listeners[i].node.id == targetNodeChar) {
+            targetListener = _listeners[i];
+            break;
+        }
+    }
+    if(!targetListener.valid) return Listener();
+    return targetListener;
+};
+
+void HFKeyboard::logListeners() {
+    for (int i = 0; i < _listenersLength; i++) {
+        Serial.println(_listeners[i].keystroke);
+    }
+}
+
+
+ 
 template <size_t n, class T>
-void HFKeyboard::push(T (&arr)[n], int &index, T const value) {
+void HFKeyboard::push(T (&arr)[n], int &length, T const value) {
     // static size_t index = 0;
 
-    arr[index] = value;
-    index = (index + 1) % n;
+    arr[length] = value;
+    length = (length + 1) % n;
 }
 
 // template <size_t n, class T> 
