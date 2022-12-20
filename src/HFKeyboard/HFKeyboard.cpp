@@ -87,9 +87,11 @@ void HFKeyboard::logListeners() {
         Serial.println(_listeners[i].keystroke);
     }
 }
+// https://codescracker.com/cpp/program/cpp-program-delete-element-from-array.htm#:~:text=In%20C%2B%2B%2C%20delete%20an,and%20delete%20it%20if%20found.
+void HFKeyboard::clearListener(int index) {
+    // _listeners[index];
+}
 
-
- 
 template <size_t n, class T>
 void HFKeyboard::push(T (&arr)[n], int &length, T const value) {
     // static size_t index = 0;

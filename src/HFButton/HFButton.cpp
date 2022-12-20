@@ -38,16 +38,23 @@ void HFButton::attachClick(keyboardFunction pressFunction, keyboardFunction rele
 }
 
 void HFButton::tick() {
+    // get current reading.
     int reading = digitalRead(_pin);
 
+    // check if reading is the same as _prevState (reading from last tick call).
 	if (reading != _prevState) {
+        // set to current time.
         _lastDebounceTime = millis();
     }
 
+    // check if current time - last debounce time is higher then debounce delay.
     if ((millis() - _lastDebounceTime) > _debounceDelay) {
+        // check if reading is different than the reading made x seconds back.
+        // if true set the _state.
         if (reading != _state) _state = reading;
     }
 
+    // handle debounce safe state:
 	if (_state == LOW && !_wasPressed) {
         // on first press:
         if (_pressFunc) _pressFunc();
@@ -61,5 +68,6 @@ void HFButton::tick() {
         _wasPressed = false;
     }
 
+    // set prev state:
 	_prevState = reading;
 }

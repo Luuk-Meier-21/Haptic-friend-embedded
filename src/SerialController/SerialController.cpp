@@ -19,8 +19,6 @@ void SerialController::tick() {
 
         _currentData = "";
     }
-
-    
 }
 
 /**
@@ -43,6 +41,7 @@ void SerialController::handleData(String data) {
     if(type == 'i' && _onInstructionData)   _onInstructionData(data);
     if(type == 's' && _onSetterData)        _onSetterData(data);
     if(type == 'g' && _onGetterData)        _onGetterData(data);
+    if(type == 'f' && _onFlushData)         _onFlushData(data);
 }
 
 /**
@@ -55,5 +54,6 @@ void SerialController::setEventListener(SerialEvent eventType, serialCallbackFun
         case Instruction: _onInstructionData = func;
         case Setter: _onSetterData = func;
         case Getter: _onGetterData = func;
+        case Flush: _onFlushData = func;
     }
 }

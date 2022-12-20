@@ -1,4 +1,5 @@
 #include "HFKeyboard.h"
+#include <Keyboard.h>
 
 Listener::Listener(Node _node, ListenerType _type, char _keystroke) {
     node = _node;
@@ -16,15 +17,14 @@ Listener::Listener() {
 }
 
 void pressFunc(char keystroke) {
-    Serial.println(keystroke);
+    Keyboard.press(keystroke);
 };
 
 void releaseFunc(char keystroke) {
-    Serial.println(keystroke);
+    Keyboard.release(keystroke);
 };
 
 void Listener::attachInteraction() {
-    keyboardFunction press = pressFunc;
 
     switch (type) {
         case ListenerType::KeystrokeClick:

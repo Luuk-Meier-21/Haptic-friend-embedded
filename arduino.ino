@@ -12,10 +12,11 @@ Node node;
 void setup() {
     while (!Serial) { ; } // wait for serial port to connect. Needed for native USB
     Serial.begin(57600); // 57600 is the max, higher values will not work.
-
+    Keyboard.begin();
     serialController.setEventListener(SerialController::Instruction, onInstruction);
     serialController.setEventListener(SerialController::Setter, onSetter);
     serialController.setEventListener(SerialController::Getter, onGetter);
+    serialController.setEventListener(SerialController::Flush, onFlush);
 
     keyboard.addNode('a', 10, 12);
     // keyboard.addNode('b', 5, 10);
@@ -62,6 +63,10 @@ void onGetter(String data) {
         case 'n': keyboard.logNodes();
         case 'l': keyboard.logListeners();
     }
+}
+
+void onFlush(String data) {
+    
 }
 
 /**

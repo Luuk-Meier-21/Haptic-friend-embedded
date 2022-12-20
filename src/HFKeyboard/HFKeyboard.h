@@ -2,6 +2,7 @@
 #define HFKeyboard_h
 
 #include <Arduino.h>
+#include <Keyboard.h>
 #include "/Users/luukmeier/Documents/Repos/Haptic Friend/arduino/src/HFButton/HFButton.h"
 
 const int maxNodes = 20;
@@ -54,8 +55,7 @@ class HFKeyboard {
         void logListeners();
         int findListenerIndex(char nodeChar);
         Listener findListener(char nodeChar);
-        
-        
+        void clearListener(int index);
         
     private:
         Node _nodes[maxNodes];
