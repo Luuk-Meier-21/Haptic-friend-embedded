@@ -15,16 +15,16 @@ void HFKeyboard::tick() {
     }
 };
 
-Node HFKeyboard::addNode(char id, int inputPin, int outputPin) {
-    Node node = Node(id, inputPin, outputPin);
+ListenerNode HFKeyboard::defineNode(char id, int inputPin, int outputPin) {
+    ListenerNode node = ListenerNode(id, inputPin, outputPin);
     push(_nodes, _nodesLength, node);
 
     return node;
 };
 
-Node HFKeyboard::findNode(char targetId) {
+ListenerNode HFKeyboard::findNode(char targetId) {
     // Inverse lookup:
-    Node targetNode;
+    Node<char, ListenerOptions> targetNode;
 
     for (int i = 0; i < _nodesLength; i++) {
         if(_nodes[i].id == targetId) {
@@ -32,7 +32,7 @@ Node HFKeyboard::findNode(char targetId) {
             break;
         }
     }
-    if(!targetNode.valid) return Node();
+    if(!targetNode.valid) return ListenerNode();
     return targetNode;
 };
 
@@ -42,30 +42,51 @@ void HFKeyboard::logNodes() {
     }
 }
 
-bool HFKeyboard::addListener(char nodeChar, char type, char keystroke) {
-    Node targetNode = findNode(nodeChar);
+bool HFKeyboard::addListener(char nodeChar, char type, char keystroke, String optionsString) {
+    ListenerNode targetNode = findNode(nodeChar);
 
     if (!targetNode.valid) return false;
-    if (findListener(nodeChar).valid) return false;
 
-    Listener listener(targetNode, ListenerType::KeystrokeClick, keystroke);
-    
-    push(_listeners, _listenersLength, listener);
-    return true;
+    ListenerOptions options = getListenerOptions(optionsString);
+
+    Listener newListener(targetNode, ListenerType::Keystroke, keystroke, options);
+
+    int targetIndex = findListenerIndex(nodeChar);
+    if (targetIndex > -1) {
+        // If node is taken, replace listener of node with newListener:
+        _listeners[targetIndex] = newListener;
+        return true;
+    } else {
+        // No taken node found, push newListener to array:
+        push(_listeners, _listenersLength, newListener);
+        return true;
+    }
 };
+
+ListenerOptions HFKeyboard::getListenerOptions(String optionsString) {
+    ListenerOptions options;
+    for (int i = 0; i < optionsString.length(); i++) {
+        char option = optionsString[i];
+        switch (option) {
+            case 'a': options.leftShift = true; break;
+            case 'b': options.rightCtrl = true; break;
+            case 'c': options.leftCtrl = true; break;
+            case 'd': options.rightCtrl = true; break;
+        }
+    };
+    return options;
+}
 
 int HFKeyboard::findListenerIndex(char targetNodeChar) {
     // Inverse lookup, to generic function?:
-    int targetListenerIndex;
-    bool found;
+    int targetListenerIndex = -1;
     for (int i = 0; i < _listenersLength; i++) {
         if(_listeners[i].node.id == targetNodeChar) {
             targetListenerIndex = i;
-            found = true;
             break;
         }
     }
-    if(!found) return _listenersLength;
+    
     return targetListenerIndex;
 };
 
@@ -84,9 +105,15 @@ Listener HFKeyboard::findListener(char targetNodeChar) {
 
 void HFKeyboard::logListeners() {
     for (int i = 0; i < _listenersLength; i++) {
-        Serial.println(_listeners[i].keystroke);
+        Serial.println(_listeners[i].node.id);
     }
 }
+
+void HFKeyboard::clearListeners() {
+  
+}
+
+
 // https://codescracker.com/cpp/program/cpp-program-delete-element-from-array.htm#:~:text=In%20C%2B%2B%2C%20delete%20an,and%20delete%20it%20if%20found.
 void HFKeyboard::clearListener(int index) {
     // _listeners[index];

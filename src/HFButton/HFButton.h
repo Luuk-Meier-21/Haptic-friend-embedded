@@ -5,21 +5,24 @@
 
 extern "C" {
     typedef void (*callbackFunction)(void);
-    typedef void (*keyboardFunction)(char);
     typedef void (*parameterizedCallbackFunction)(void *);
 }
 
+template<typename PT, typename OT>
 class HFButton {
     public:
+        typedef void (*Callable)(PT, OT);
+        
         HFButton(int pin);
         void tick();
 
         void attachPress(callbackFunction newFunction);
-        void attachPress(keyboardFunction newFunction, char param);
+        void attachPress(Callable newFunction, char param);
         void attachRelease(callbackFunction newFunction); 
-        void attachRelease(keyboardFunction newFunction, char param);
+        void attachRelease(Callable newFunction, char param);
         void attachClick(callbackFunction pressFunction, callbackFunction releaseFunction);
-        void attachClick(keyboardFunction pressFunction, keyboardFunction releaseFunction, char param);
+        void attachClick(Callable pressFunction, Callable releaseFunction, PT param);
+        void attachClick(Callable pressFunction, Callable releaseFunction, PT param, OT options);
         // void attachPress(parameterizedCallbackFunction newFunction, void *parameter);
     private:
         int _pin;
@@ -32,8 +35,9 @@ class HFButton {
         callbackFunction _pressFunc = NULL;
         callbackFunction _releaseFunc = NULL;
 
-        keyboardFunction _paramPressFunc = NULL;
-        keyboardFunction _paramReleaseFunc = NULL;
-        char _keyboardParam;
+        Callable _paramPressFunc = NULL;
+        Callable _paramReleaseFunc = NULL;
+        PT _param;
+        OT _options = OT();
 };
-#endif
+#endif;

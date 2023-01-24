@@ -1,35 +1,37 @@
 #include "HFKeyboard.h"
 #include <Keyboard.h>
 
-Listener::Listener(Node _node, ListenerType _type, char _keystroke) {
+Listener::Listener(ListenerNode _node, ListenerType _type, char _keystroke, ListenerOptions _options) {
     node = _node;
-    type = ListenerType::KeystrokeClick;
+    type = ListenerType::Keystroke;
     keystroke = _keystroke;
+    options = _options;
     valid = true;
     attachInteraction();
 }
 
 Listener::Listener() {
-    node = Node();
+    node = ListenerNode();
     type = ListenerType::Empty;
     keystroke = NULL;
     valid = false;
 }
 
-void pressFunc(char keystroke) {
-    Keyboard.press(keystroke);
-};
+ListenerHFButton::Callable press(char keystroke, ListenerOptions options) {
 
-void releaseFunc(char keystroke) {
-    Keyboard.release(keystroke);
-};
+}
+ListenerHFButton::Callable release(char keystroke, ListenerOptions options) {
+    
+}
 
 void Listener::attachInteraction() {
 
     switch (type) {
-        case ListenerType::KeystrokeClick:
-            node.button.attachClick(pressFunc, releaseFunc, keystroke);
+        case ListenerType::Keystroke:
+            
+            // node.button.attachClick(*press, *release, keystroke);
             break;
     }
 }
+
 

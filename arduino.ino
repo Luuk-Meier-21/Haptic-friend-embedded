@@ -7,20 +7,21 @@
 HFKeyboard keyboard;
 SerialController serialController;
 
-Node node;
+ListenerNode node;
 
 void setup() {
     while (!Serial) { ; } // wait for serial port to connect. Needed for native USB
     Serial.begin(57600); // 57600 is the max, higher values will not work.
     Keyboard.begin();
+    serialController.setEventListener(SerialController::Data, onData);
     serialController.setEventListener(SerialController::Instruction, onInstruction);
     serialController.setEventListener(SerialController::Setter, onSetter);
     serialController.setEventListener(SerialController::Getter, onGetter);
     serialController.setEventListener(SerialController::Flush, onFlush);
 
-    keyboard.addNode('a', 10, 12);
-    // keyboard.addNode('b', 5, 10);
-    // keyboard.addNode('c', 6, 20);
+    keyboard.defineNode('a', 10, 12);
+    keyboard.defineNode('b', 2, 1);
+    keyboard.defineNode('c', 4, 6);
 }
 
 void loop() {    
@@ -29,7 +30,7 @@ void loop() {
     keyboard.tick();
 }
 
-// Message types:
+// Message types:x  
 // s:   Setter message, sets listeners to given nodes.
 //      s<node: char><type: char><character: char>
 
@@ -40,6 +41,10 @@ void loop() {
 // i:   Instruction message, do something with this input.
 //      i<node: char><value: int>
 
+void onData(String message) {
+    
+}
+
 /**
  * Function called when the serialport recieves a message with a 's' identifier, for example: "saag".
 */
@@ -48,7 +53,8 @@ void onSetter(String data) {
     char nodeChar = data[1];
     char typeChar = data[2]; // Useless until implemented.
     char keystroke = data[3];
-    bool succes = keyboard.addListener(nodeChar, typeChar, keystroke);
+    String options = data.substring(4, data.length());
+    bool succes = keyboard.addListener(nodeChar, typeChar, keystroke, options);
 }
 
 /**
@@ -60,8 +66,8 @@ void onGetter(String data) {
     char type = data[1];
 
     switch (type) {
-        case 'n': keyboard.logNodes();
-        case 'l': keyboard.logListeners();
+        case 'n': keyboard.logNodes(); break;
+        case 'l': keyboard.logListeners(); break;
     }
 }
 
@@ -73,5 +79,25 @@ void onFlush(String data) {
  * Function called when the serialport recieves a message with a 'i' identifier, for example: "ia1".
 */
 void onInstruction(String data) {
-    Serial.println("Instruction: " + data);
+    char identifier = data[0]; // Will always be 'i' here.
+    char nodeChar = data[1];
+    char state = data[2];
+    ListenerNode targetNode = keyboard.findNode(nodeChar);
+
+    if (state < 0 && state > 1) return;
+    if (!targetNode.valid) return;
+
+    Serial.println(data);
+    
+    switch (state) {
+        case '1':
+            digitalWrite(targetNode.outputPin, HIGH);
+            break;
+        case '2':
+            // For extra switch pin, setts output to bright:
+            break;
+        default:
+            digitalWrite(targetNode.outputPin, LOW);
+            break;
+    }
 } 

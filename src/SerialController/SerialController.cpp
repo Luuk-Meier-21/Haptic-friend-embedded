@@ -37,11 +37,43 @@ void SerialController::catchHandshake(String data) {
 void SerialController::handleData(String data) {
     char type = data[0];
 
-    if(_onData)                             _onData(data);
-    if(type == 'i' && _onInstructionData)   _onInstructionData(data);
-    if(type == 's' && _onSetterData)        _onSetterData(data);
-    if(type == 'g' && _onGetterData)        _onGetterData(data);
-    if(type == 'f' && _onFlushData)         _onFlushData(data);
+    if(_onData) {
+        _onData(data);
+    }
+
+    switch (type)
+    {
+        case 'r':
+            if (_onInitData) {
+                _onInitData(data);
+                Serial.println("cr");
+            }
+            break;
+        case 'i':
+            if (_onInstructionData) {
+                _onInstructionData(data);
+                Serial.println("ci");
+            }
+            break;
+        case 's':
+            if (_onSetterData) {
+                _onSetterData(data);
+                Serial.println("cs");
+            }
+            break;
+        case 'g':
+            if (_onGetterData) {
+                _onGetterData(data);
+                Serial.println("cg");
+            }
+            break;
+        case 'f':
+            if (_onFlushData) {
+                _onFlushData(data);
+                Serial.println("cf");
+            }
+            break;
+    }
 }
 
 /**
@@ -51,6 +83,7 @@ void SerialController::setEventListener(SerialEvent eventType, serialCallbackFun
     switch (eventType) {
         case Data: _onData = func;
         case Handshake: _onHandshake = func;
+        case Init: _onInitData = func;
         case Instruction: _onInstructionData = func;
         case Setter: _onSetterData = func;
         case Getter: _onGetterData = func;

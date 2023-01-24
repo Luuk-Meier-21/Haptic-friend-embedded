@@ -1,43 +1,60 @@
 #include "Arduino.h"
 #include "HFButton.h"
+#include "/Users/luukmeier/Documents/Repos/Haptic Friend/arduino/src/HFKeyboard/HFKeyboard.h"
 
-HFButton::HFButton(int pin) {
+template<typename PT, typename OT>
+HFButton<PT, OT>::HFButton(int pin) {
 	pinMode(pin, INPUT_PULLUP);
 	_pin = pin;
 }
 
 // Void functions:
-void HFButton::attachPress(callbackFunction newFunction) {
+template<typename PT, typename OT>
+void HFButton<PT, OT>::attachPress(callbackFunction newFunction) {
 	_pressFunc = newFunction;
 }
 
-void HFButton::attachRelease(callbackFunction newFunction) {
+template<typename PT, typename OT>
+void HFButton<PT, OT>::attachRelease(callbackFunction newFunction) {
 	_releaseFunc = newFunction;
 }
 
 // Param functions:
-void HFButton::attachPress(keyboardFunction newFunction, char param) {
+template<typename PT, typename OT>
+void HFButton<PT, OT>::attachPress(Callable newFunction, char param) {
 	_paramPressFunc = newFunction;
-    _keyboardParam = param;
+    _param = param;
 }
 
-void HFButton::attachRelease(keyboardFunction newFunction, char param) {
+template<typename PT, typename OT>
+void HFButton<PT, OT>::attachRelease(Callable newFunction, char param) {
 	_paramReleaseFunc = newFunction;
-    _keyboardParam = param;
+    _param = param;
 }
 
-void HFButton::attachClick(callbackFunction pressFunction, callbackFunction releaseFunction) {
+template<typename PT, typename OT>
+void HFButton<PT, OT>::attachClick(callbackFunction pressFunction, callbackFunction releaseFunction) {
     _pressFunc = releaseFunction;
 	_releaseFunc = releaseFunction;
 }
 
-void HFButton::attachClick(keyboardFunction pressFunction, keyboardFunction releaseFunction, char param) {
+template<typename PT, typename OT>
+void HFButton<PT, OT>::attachClick(Callable pressFunction, Callable releaseFunction, PT param) {
     _paramPressFunc = pressFunction;
 	_paramReleaseFunc = releaseFunction;
-    _keyboardParam = param;
+    _param = param;
 }
 
-void HFButton::tick() {
+template<typename PT, typename OT>
+void HFButton<PT, OT>::attachClick(Callable pressFunction, Callable releaseFunction, PT param, OT options) {
+    _paramPressFunc = pressFunction;
+	_paramReleaseFunc = releaseFunction;
+    _param = param;
+    _options = options;
+}
+
+template<typename PT, typename OT>
+void HFButton<PT, OT>::tick() {
     // get current reading.
     int reading = digitalRead(_pin);
 
@@ -58,16 +75,19 @@ void HFButton::tick() {
 	if (_state == LOW && !_wasPressed) {
         // on first press:
         if (_pressFunc) _pressFunc();
-        if (_paramPressFunc) _paramPressFunc(_keyboardParam);
+        if (_paramPressFunc) _paramPressFunc(_param, _options);
         _wasPressed = true;
     }
     else if (_state == HIGH && _wasPressed) {
         // on release:
         if (_releaseFunc) _releaseFunc();
-        if (_paramReleaseFunc) _paramReleaseFunc(_keyboardParam);
+        if (_paramReleaseFunc) _paramReleaseFunc(_param, _options);
         _wasPressed = false;
     }
 
     // set prev state:
 	_prevState = reading;
 }
+
+// Reference fix:
+template class HFButton<char, ListenerOptions>;

@@ -14,7 +14,7 @@ class SerialController {
         void use(serialCallbackFunction serialDataFunc);
         void tick();
 
-        enum SerialEvent { Data, Handshake, Instruction, Setter, Getter, Flush };
+        enum SerialEvent { Data, Handshake, Init, Instruction, Setter, Getter, Flush };
         void setEventListener(SerialEvent eventType, serialCallbackFunction func);
 
     private:
@@ -26,6 +26,7 @@ class SerialController {
 
         serialCallbackFunction _onData = NULL;
         serialCallbackFunction _onHandshake = NULL;
+        serialCallbackFunction _onInitData = NULL;
         serialCallbackFunction _onInstructionData = NULL;
         serialCallbackFunction _onSetterData = NULL;
         serialCallbackFunction _onGetterData = NULL;
