@@ -24,7 +24,7 @@ ListenerNode HFKeyboard::defineNode(char id, int inputPin, int outputPin) {
 
 ListenerNode HFKeyboard::findNode(char targetId) {
     // Inverse lookup:
-    Node<char, ListenerOptions> targetNode;
+    ListenerNode targetNode;
 
     for (int i = 0; i < _nodesLength; i++) {
         if(_nodes[i].id == targetId) {
@@ -42,14 +42,16 @@ void HFKeyboard::logNodes() {
     }
 }
 
-bool HFKeyboard::addListener(char nodeChar, char type, char keystroke, String optionsString) {
+bool HFKeyboard::addListener(char nodeChar, char typeChar, char keystroke, String optionsString) {
     ListenerNode targetNode = findNode(nodeChar);
-
     if (!targetNode.valid) return false;
 
+    ListenerType type = getListenerType(typeChar);
+    if (type == Empty) return false;
+    
     ListenerOptions options = getListenerOptions(optionsString);
 
-    Listener newListener(targetNode, ListenerType::Keystroke, keystroke, options);
+    Listener newListener(targetNode, type, keystroke, options);
 
     int targetIndex = findListenerIndex(nodeChar);
     if (targetIndex > -1) {
@@ -75,6 +77,15 @@ ListenerOptions HFKeyboard::getListenerOptions(String optionsString) {
         }
     };
     return options;
+}
+
+ListenerType HFKeyboard::getListenerType(char typeChar) {
+    switch (typeChar) {
+        case 'a': return ListenerType::Keystroke;
+        case 'b': return ListenerType::Arrow;
+        case 'c': return ListenerType::WASD;
+        default: return ListenerType::Empty;
+    }
 }
 
 int HFKeyboard::findListenerIndex(char targetNodeChar) {

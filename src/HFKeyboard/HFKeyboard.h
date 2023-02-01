@@ -5,19 +5,9 @@
 #include <Keyboard.h>
 #include "/Users/luukmeier/Documents/Repos/Haptic Friend/arduino/src/HFButton/HFButton.h"
 
-const int maxNodes = 20;
-
-struct ListenerOptions {
-    bool leftShift = false;     // a
-    bool rightShift = false;    // b
-    bool leftCtrl = false;      // c
-    bool rightCtrl = false;     // d
-};
-
 template<class PT, class OT>
 class Node {
     public: 
-    
         Node(char id, int inputPin, int outputPin);
         Node();
         char id;
@@ -29,14 +19,21 @@ class Node {
         void attachInteraction(char keystroke);
 };
 
-typedef HFButton<char, ListenerOptions> ListenerHFButton;
-typedef Node<char, ListenerOptions> ListenerNode;
-
-enum class ListenerType: char { 
-    Empty = 'x',
-    Keystroke = 'a',
-    Arrows = 'b'
+struct ListenerOptions {
+    bool leftShift = false;     // a
+    bool rightShift = false;    // b
+    bool leftCtrl = false;      // c
+    bool rightCtrl = false;     // d
 };
+
+enum ListenerType { 
+    Keystroke,
+    Arrow,
+    WASD,
+    Empty
+};
+
+typedef Node<char, ListenerOptions> ListenerNode;
 
 class Listener {
     public: 
@@ -48,8 +45,6 @@ class Listener {
         ListenerOptions options;
         bool valid;
     private:
-        void pressKeystroke(char keystroke);
-        void releaseKeystroke(char keystroke);
         void attachInteraction();
 };  
 
@@ -66,6 +61,7 @@ class HFKeyboard {
 
         // Listeners
         bool addListener(char node, char type, char keystroke, String options);   
+        ListenerType getListenerType(char typeChar);
         ListenerOptions getListenerOptions(String optionsString);
         void logListeners();
         int findListenerIndex(char nodeChar);
@@ -74,6 +70,8 @@ class HFKeyboard {
         void clearListeners();
         
     private:
+        static const int maxNodes = 20;
+
         ListenerNode _nodes[maxNodes];
         int _nodesLength = 0;   
     

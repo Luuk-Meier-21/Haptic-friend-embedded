@@ -3,30 +3,27 @@
 
 #include <Arduino.h>
 
-extern "C" {
-    typedef void (*serialCallbackFunction)(String);
-    typedef void (*serialCallbackFunctionArray)(String);
-}
-
 class SerialController {
     public:
+        typedef bool (*serialCallbackFunction)(String);
+        typedef void (*serialCallbackFunctionArray)(String);
 
         void use(serialCallbackFunction serialDataFunc);
         void tick();
 
-        enum SerialEvent { Data, Handshake, Init, Instruction, Setter, Getter, Flush };
+        enum SerialEvent { Data, Handshake, Instruction, Setter, Getter, Flush };
         void setEventListener(SerialEvent eventType, serialCallbackFunction func);
 
     private:
         void catchHandshake(String message);
         void handleData(String data);
+        void callEvent(serialCallbackFunction func, String data, char type);
 
         String _currentData = "";
         bool _handshakeConfirmed = false;
 
         serialCallbackFunction _onData = NULL;
         serialCallbackFunction _onHandshake = NULL;
-        serialCallbackFunction _onInitData = NULL;
         serialCallbackFunction _onInstructionData = NULL;
         serialCallbackFunction _onSetterData = NULL;
         serialCallbackFunction _onGetterData = NULL;

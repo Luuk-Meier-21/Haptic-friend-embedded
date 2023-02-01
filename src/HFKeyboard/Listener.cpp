@@ -17,19 +17,59 @@ Listener::Listener() {
     valid = false;
 }
 
-ListenerHFButton::Callable press(char keystroke, ListenerOptions options) {
+enum ClickState {
+    Press,
+    Release
+};
 
+void handleClick(uint8_t key, ClickState state) {
+    switch (state) {
+        case ClickState::Press: Keyboard.press(key); break;
+        case ClickState::Release: Keyboard.release(key); break;
+    }
+};
+
+void handleOptions(const ListenerOptions options, const ClickState state) {   
+    if(options.leftShift) handleClick(KEY_LEFT_SHIFT, state);
+    if(options.rightShift) handleClick(KEY_RIGHT_SHIFT, state);
+
+    if(options.leftCtrl) handleClick(KEY_LEFT_CTRL, state);
+    if(options.rightCtrl) handleClick(KEY_RIGHT_CTRL, state);
+
+    if(options.leftCtrl) handleClick(KEY_LEFT_CTRL, state);
+    if(options.rightCtrl) handleClick(KEY_RIGHT_CTRL, state);
+};
+
+/**
+ * Press any keystroke with 
+*/
+
+void pressKeystroke(char keystroke, ListenerOptions options) {
+    handleOptions(options, ClickState::Press);
+    Keyboard.press(keystroke);
 }
-ListenerHFButton::Callable release(char keystroke, ListenerOptions options) {
+void releaseKeystroke(char keystroke, ListenerOptions options) {
+    handleOptions(options, ClickState::Release);
+    Keyboard.release(keystroke);
+}
+
+void pressArrow(char arrowChar, ListenerOptions options) {
+    
+}
+void releaseArrow(char arrowChar, ListenerOptions options) {
     
 }
 
 void Listener::attachInteraction() {
-
     switch (type) {
         case ListenerType::Keystroke:
-            
-            // node.button.attachClick(*press, *release, keystroke);
+            node.button.attachClick(pressKeystroke, releaseKeystroke, keystroke, options);
+            break;
+        case ListenerType::Arrow:
+            node.button.attachClick(pressArrow, releaseArrow, keystroke, options);
+            break;
+        case ListenerType::WASD:
+            node.button.attachClick(pressArrow, releaseArrow, keystroke, options);
             break;
     }
 }

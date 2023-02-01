@@ -13,7 +13,6 @@ void setup() {
     while (!Serial) { ; } // wait for serial port to connect. Needed for native USB
     Serial.begin(57600); // 57600 is the max, higher values will not work.
     Keyboard.begin();
-    serialController.setEventListener(SerialController::Data, onData);
     serialController.setEventListener(SerialController::Instruction, onInstruction);
     serialController.setEventListener(SerialController::Setter, onSetter);
     serialController.setEventListener(SerialController::Getter, onGetter);
@@ -41,26 +40,22 @@ void loop() {
 // i:   Instruction message, do something with this input.
 //      i<node: char><value: int>
 
-void onData(String message) {
-    
-}
-
 /**
  * Function called when the serialport recieves a message with a 's' identifier, for example: "saag".
 */
-void onSetter(String data) {
+bool onSetter(String data) {
     char identifier = data[0]; // Will always be 's' here.
     char nodeChar = data[1];
     char typeChar = data[2]; // Useless until implemented.
     char keystroke = data[3];
     String options = data.substring(4, data.length());
-    bool succes = keyboard.addListener(nodeChar, typeChar, keystroke, options);
+    return keyboard.addListener(nodeChar, typeChar, keystroke, options);
 }
 
 /**
  * Function called when the serialport recieves a message with a 'g' identifier, for example: "gl".
 */
-void onGetter(String data) {
+bool onGetter(String data) {
     Serial.println("———");
     char identifier = data[0];
     char type = data[1];
@@ -71,21 +66,21 @@ void onGetter(String data) {
     }
 }
 
-void onFlush(String data) {
+bool onFlush(String data) {
     
 }
 
 /**
  * Function called when the serialport recieves a message with a 'i' identifier, for example: "ia1".
 */
-void onInstruction(String data) {
+bool onInstruction(String data) {
     char identifier = data[0]; // Will always be 'i' here.
     char nodeChar = data[1];
     char state = data[2];
     ListenerNode targetNode = keyboard.findNode(nodeChar);
 
-    if (state < 0 && state > 1) return;
-    if (!targetNode.valid) return;
+    if (state < 0 && state > 1) return false;
+    if (!targetNode.valid) return false;
 
     Serial.println(data);
     
@@ -94,10 +89,12 @@ void onInstruction(String data) {
             digitalWrite(targetNode.outputPin, HIGH);
             break;
         case '2':
-            // For extra switch pin, setts output to bright:
+            return false;
             break;
         default:
             digitalWrite(targetNode.outputPin, LOW);
             break;
     }
+
+    return true;
 } 
